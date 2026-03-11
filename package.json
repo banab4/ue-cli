@@ -1,0 +1,27 @@
+{
+  "name": "@banab4/ue-cli",
+  "version": "0.1.0",
+  "description": "Unreal Engine Remote Control API CLI",
+  "type": "module",
+  "bin": {
+    "ue-cli": "./bin/ue-cli.js"
+  },
+  "files": [
+    "bin/",
+    "src/"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "keywords": [
+    "unreal",
+    "unreal-engine",
+    "remote-control",
+    "cli"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/banab4/ue-cli"
+  }
+}

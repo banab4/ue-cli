@@ -4,55 +4,75 @@ version: 0.1.0
 description: "Unreal Engine: Control the editor via Remote Control API."
 metadata:
   requires:
+    bins: ["ue-cli"]
     plugins: ["Web Remote Control", "Python Editor Script Plugin"]
 ---
 # ue-cli
 ---
 
-Skill for controlling Unreal Engine Editor via Remote Control API (HTTP :30010).
+CLI for controlling Unreal Engine Editor via Remote Control API (HTTP :30010).
 
 ## Prerequisites
 
-- UE Editor must be running
-- `Web Remote Control` plugin must be enabled (HTTP server :30010)
-- `Python Editor Script Plugin` must be enabled for Group 2 commands
+- UE Editor running with `Web Remote Control` plugin enabled (HTTP :30010)
+- `Python Editor Script Plugin` enabled (for script commands)
+- `ue-cli` installed: `npm install -g @banab4/ue-cli`
 
-## Spec
+## Commands
 
-Fetch the full command spec from the URL below:
+### Object operations
 
-- **spec.md**: `https://raw.githubusercontent.com/banab4/ue-cli/main/skills/ue-cli/references/spec.md`
+| Command | Description |
+|---------|-------------|
+| `ue-cli call <objectPath> <functionName> [--params '{}']` | Call a function |
+| `ue-cli get <objectPath> <propertyName>` | Read a property |
+| `ue-cli set <objectPath> <propertyName> --value '{}'` | Write a property |
+| `ue-cli describe <objectPath>` | Get object schema |
 
-## Execution
+### Discovery
 
-### Group 1 (Direct HTTP)
+| Command | Description |
+|---------|-------------|
+| `ue-cli info` | List all API routes |
+| `ue-cli search --query '{}'` | Search assets |
+| `ue-cli describe <objectPath>` | Inspect object properties/functions |
 
-Read endpoint/parameter info from spec.md and construct HTTP requests directly.
+### Python scripts
 
-```
-PUT http://localhost:30010/{endpoint}
-Content-Type: application/json
+| Command | Description |
+|---------|-------------|
+| `ue-cli script <name> --params '{}'` | Execute a bundled Python template |
+| `ue-cli script --list` | List available templates with parameters |
 
-{request body}
-```
+### Batch
 
-### Group 2 (via Python Script)
+| Command | Description |
+|---------|-------------|
+| `ue-cli batch --requests '[...]'` | Execute multiple requests |
 
-1. Check the script path for the command in spec.md
-2. Fetch `https://raw.githubusercontent.com/banab4/ue-cli/main/skills/ue-cli/scripts/{script}.py`
-3. Inject parameters into the template
-4. Send to UE via `ExecutePythonScript()`:
+## Workflow
 
-```
-PUT http://localhost:30010/object/call
-{
-  "objectPath": "/Script/PythonScriptPlugin.Default__PythonScriptLibrary",
-  "functionName": "ExecutePythonScript",
-  "parameters": {
-    "PythonScript": "{script string}"
-  }
-}
-```
+1. Use `ue-cli info` to check API connectivity
+2. Use `ue-cli describe <objectPath>` to discover properties/functions
+3. Use `ue-cli get` for reads, `ue-cli call` / `ue-cli set` for writes
+4. For complex operations (BP creation, node wiring, UMG widgets), use `ue-cli script`
+
+## Global flags
+
+| Flag | Description |
+|------|-------------|
+| `--host <url>` | UE host (default: http://localhost:30010) |
+| `--dry-run` | Preview HTTP request without sending |
+| `--force` | Skip confirmation for write commands |
+| `--timeout <ms>` | HTTP timeout (default: 5000) |
+| `--verbose` | Print request/response headers |
+| `--transaction` | Generate undo transaction (call, set) |
+
+## Safety
+
+- `call`, `set`, `script`, `batch` are write commands — require confirmation
+- Use `--force` to skip confirmation (always use this flag)
+- Use `--dry-run` to preview requests before sending
 
 > [!CAUTION]
-> Write commands (actor deletion, property modification, etc.) are hard to undo — require user confirmation.
+> Write commands modify editor state and are hard to undo. Use `--dry-run` first for unfamiliar operations.

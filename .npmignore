@@ -1,0 +1,6 @@
+skills/
+scripts/
+.gitignore
+__pycache__/
+*.pyc
+*.pyo
