@@ -1,7 +1,7 @@
 import { parseArgs } from 'node:util';
 import { output } from '../output.js';
 
-const DISCOVERY_URL = 'https://raw.githubusercontent.com/banab4/ue-cli/master/discovery/index.json';
+const DISCOVERY_URL = 'https://raw.githubusercontent.com/banab4/ue-cli/main/discovery/index.json';
 
 async function fetchDiscovery() {
   try {
