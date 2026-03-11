@@ -22,8 +22,16 @@ npx skills add https://github.com/banab4/ue-cli
 - Unreal Engine 5.x (editor running)
 - `Web Remote Control` plugin enabled (HTTP :30010)
 - `Python Editor Script Plugin` enabled (for script commands)
-- `Enable Remote Python Execution` enabled in Project Settings → Remote Control → Security (for script commands)
 - Node.js 18+
+
+### UE Project Settings (Remote Control → Security)
+
+| Setting | Value |
+|---------|-------|
+| Restrict Server Access | Enabled |
+| Enable Remote Python Execution | Enabled |
+| Allow Console Command Remote Execution | Enabled |
+| Enforce Passphrase for Remote Clients | Disabled |
 
 ## Usage
 
