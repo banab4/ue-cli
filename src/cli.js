@@ -7,6 +7,7 @@ import { scriptCommand } from './commands/script.js';
 import { searchCommand } from './commands/search.js';
 import { infoCommand } from './commands/info.js';
 import { batchCommand } from './commands/batch.js';
+import { discoverCommand } from './commands/discover.js';
 import { output } from './output.js';
 
 const VERBS = {
@@ -18,6 +19,7 @@ const VERBS = {
   search: searchCommand,
   info: infoCommand,
   batch: batchCommand,
+  discover: discoverCommand,
 };
 
 const GLOBAL_OPTIONS = {
@@ -43,6 +45,7 @@ Commands:
   search    Search for assets
   info      Show Remote Control API info
   batch     Execute multiple requests
+  discover  Browse available objects and functions
 
 Global options:
   --host <url>      UE Remote Control host (default: http://localhost:30010)

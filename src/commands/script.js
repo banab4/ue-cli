@@ -4,8 +4,8 @@ import { output } from '../output.js';
 import { validateRequired, validateJSON } from '../validation.js';
 import { confirmWrite } from '../safety.js';
 
-const REPO_BASE = 'https://raw.githubusercontent.com/banab4/ue-cli/master/skills/ue-cli/scripts';
-const GITHUB_API = 'https://api.github.com/repos/banab4/ue-cli/contents/skills/ue-cli/scripts';
+const REPO_BASE = 'https://raw.githubusercontent.com/banab4/ue-cli/master/discovery/scripts';
+const GITHUB_API = 'https://api.github.com/repos/banab4/ue-cli/contents/discovery/scripts';
 
 function extractPlaceholders(templateContent) {
   const placeholders = new Set();

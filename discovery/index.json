@@ -1,0 +1,156 @@
+{
+  "version": "0.1.0",
+  "generated": "2026-03-12",
+  "generatedBy": "manual",
+  "objects": [
+    {
+      "objectPath": "/Script/UnrealEd.Default__EditorActorSubsystem",
+      "class": "EditorActorSubsystem",
+      "category": "subsystem",
+      "description": "Actor creation, duplication, selection, and level management",
+      "functions": [
+        {
+          "name": "GetAllLevelActors",
+          "safety": "READ",
+          "description": "Get all actors in the current level",
+          "params": {},
+          "returns": { "ReturnValue": "Array<Actor>" }
+        },
+        {
+          "name": "GetAllLevelActorsOfClass",
+          "safety": "READ",
+          "description": "Get all actors of a specific class",
+          "params": { "ActorClass": { "type": "Class", "required": true } },
+          "returns": { "ReturnValue": "Array<Actor>" }
+        },
+        {
+          "name": "GetSelectedLevelActors",
+          "safety": "READ",
+          "description": "Get currently selected actors",
+          "params": {},
+          "returns": { "ReturnValue": "Array<Actor>" }
+        },
+        {
+          "name": "SpawnActorFromClass",
+          "safety": "WRITE",
+          "description": "Spawn an actor from a class",
+          "params": {
+            "ActorClass": { "type": "string", "required": true },
+            "ActorTransform": { "type": "Transform", "required": false }
+          },
+          "returns": { "ReturnValue": "Actor" }
+        },
+        {
+          "name": "DuplicateActors",
+          "safety": "WRITE",
+          "description": "Duplicate actors",
+          "params": { "ActorsToDuplicate": { "type": "Array<Actor>", "required": true } },
+          "returns": { "ReturnValue": "Array<Actor>" }
+        },
+        {
+          "name": "DestroyActors",
+          "safety": "WRITE",
+          "description": "Destroy actors",
+          "params": { "ActorsToDestroy": { "type": "Array<Actor>", "required": true } },
+          "returns": {}
+        },
+        {
+          "name": "SelectNothing",
+          "safety": "WRITE",
+          "description": "Clear actor selection",
+          "params": {},
+          "returns": {}
+        },
+        {
+          "name": "SetActorSelectionState",
+          "safety": "WRITE",
+          "description": "Set selection state for an actor",
+          "params": {
+            "Actor": { "type": "Actor", "required": true },
+            "bShouldBeSelected": { "type": "bool", "required": true }
+          },
+          "returns": {}
+        }
+      ],
+      "properties": []
+    },
+    {
+      "objectPath": "/Script/UnrealEd.Default__UnrealEditorSubsystem",
+      "class": "UnrealEditorSubsystem",
+      "category": "subsystem",
+      "description": "Editor utility functions including viewport camera control",
+      "functions": [
+        {
+          "name": "GetLevelViewportCameraInfo",
+          "safety": "READ",
+          "description": "Get viewport camera location and rotation",
+          "params": {},
+          "returns": { "CameraLocation": "Vector", "CameraRotation": "Rotator", "ReturnValue": "bool" }
+        },
+        {
+          "name": "SetLevelViewportCameraInfo",
+          "safety": "WRITE",
+          "description": "Set viewport camera location and rotation",
+          "params": {
+            "CameraLocation": { "type": "Vector", "required": true },
+            "CameraRotation": { "type": "Rotator", "required": true }
+          },
+          "returns": {}
+        }
+      ],
+      "properties": []
+    },
+    {
+      "objectPath": "/Script/EditorScriptingUtilities.Default__EditorLevelLibrary",
+      "class": "EditorLevelLibrary",
+      "category": "library",
+      "deprecated": true,
+      "deprecatedBy": "/Script/UnrealEd.Default__EditorActorSubsystem",
+      "description": "Legacy level editing library (use EditorActorSubsystem instead)",
+      "functions": [
+        {
+          "name": "GetAllLevelActors",
+          "safety": "READ",
+          "description": "Get all actors (DEPRECATED)",
+          "params": {},
+          "returns": { "ReturnValue": "Array<Actor>" }
+        },
+        {
+          "name": "SpawnActorFromClass",
+          "safety": "WRITE",
+          "description": "Spawn actor (DEPRECATED)",
+          "params": {
+            "ActorClass": { "type": "string", "required": true },
+            "Location": { "type": "Vector", "required": false },
+            "Rotation": { "type": "Rotator", "required": false }
+          },
+          "returns": { "ReturnValue": "Actor" }
+        },
+        {
+          "name": "DestroyActor",
+          "safety": "WRITE",
+          "description": "Destroy an actor (DEPRECATED)",
+          "params": { "ActorToDestroy": { "type": "Actor", "required": true } },
+          "returns": { "ReturnValue": "bool" }
+        }
+      ],
+      "properties": []
+    },
+    {
+      "objectPath": "/Script/PythonScriptPlugin.Default__PythonScriptLibrary",
+      "class": "PythonScriptLibrary",
+      "category": "library",
+      "description": "Execute Python scripts in the editor (used internally by ue-cli script command)",
+      "functions": [
+        {
+          "name": "ExecutePythonScript",
+          "safety": "WRITE",
+          "description": "Execute a Python script string",
+          "params": { "PythonScript": { "type": "string", "required": true } },
+          "returns": { "ReturnValue": "bool" }
+        }
+      ],
+      "properties": []
+    }
+  ]
+}

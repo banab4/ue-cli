@@ -1,5 +1,5 @@
 skills/
-scripts/
+discovery/
 .gitignore
 __pycache__/
 *.pyc
