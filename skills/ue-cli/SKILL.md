@@ -16,7 +16,7 @@ CLI for controlling Unreal Engine Editor via Remote Control API (HTTP :30010).
 
 - UE Editor running with `Web Remote Control` plugin enabled (HTTP :30010)
 - `Python Editor Script Plugin` enabled (for script commands)
-- `ue-cli` installed: `npm install -g @banab4/ue-cli`
+- `ue-cli` installed: `npm install -g @banaba/ue-cli`
 
 ## Commands
 

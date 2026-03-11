@@ -8,7 +8,7 @@ CLI + AI agent skill for controlling Unreal Engine Editor via Remote Control API
 ### CLI (for humans and agents)
 
 ```bash
-npm install -g @banab4/ue-cli
+npm install -g @banaba/ue-cli
 ```
 
 ### Skill (for AI agents)

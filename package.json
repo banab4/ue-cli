@@ -1,5 +1,5 @@
 {
-  "name": "@banab4/ue-cli",
+  "name": "@banaba/ue-cli",
   "version": "0.1.0",
   "description": "Unreal Engine Remote Control API CLI",
   "type": "module",
