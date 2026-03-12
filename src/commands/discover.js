@@ -1,6 +1,6 @@
 import { parseArgs } from 'node:util';
 import { output } from '../output.js';
-import { fetchMergedIndex } from '../config.js';
+import { fetchMergedIndex, fetchObjectDetail } from '../config.js';
 
 async function fetchDiscovery() {
   return await fetchMergedIndex();
@@ -58,29 +58,20 @@ Search:
       process.exit(1);
     }
 
-    // Search mode: unified search across objects and scripts
+    // Search mode: search objects and scripts by class/description
     if (positionals[0] && !values.detail && !values.object && !values.category) {
       const query = positionals[0].toLowerCase();
 
-      const matchedObjects = [];
-      for (const obj of discovery.objects) {
-        const matchedFns = obj.functions.filter(f =>
-          f.name.toLowerCase().includes(query) ||
-          f.description.toLowerCase().includes(query)
-        );
-        if (
-          obj.class.toLowerCase().includes(query) ||
-          obj.description.toLowerCase().includes(query) ||
-          matchedFns.length > 0
-        ) {
-          matchedObjects.push({
-            objectPath: obj.objectPath,
-            class: obj.class,
-            description: obj.description,
-            matchedFunctions: matchedFns.map(f => f.name),
-          });
-        }
-      }
+      const matchedObjects = discovery.objects.filter(obj =>
+        obj.class.toLowerCase().includes(query) ||
+        obj.description.toLowerCase().includes(query)
+      ).map(obj => ({
+        objectPath: obj.objectPath,
+        class: obj.class,
+        category: obj.category,
+        description: obj.description,
+        functionCount: obj.functionCount,
+      }));
 
       const matchedScripts = (discovery.scripts || []).filter(s =>
         s.name.toLowerCase().includes(query) ||
@@ -95,11 +86,17 @@ Search:
       return;
     }
 
-    // Detail mode: show full signatures for one object
+    // Detail mode: fetch per-object file for full signatures
     if (values.detail) {
-      const obj = discovery.objects.find(o => o.objectPath === values.detail);
-      if (!obj) {
+      const meta = discovery.objects.find(o => o.objectPath === values.detail);
+      if (!meta) {
         output.error('discover', `Object not found: ${values.detail}`, 'NOT_FOUND');
+        process.exit(1);
+      }
+
+      const obj = await fetchObjectDetail(meta.class);
+      if (!obj) {
+        output.error('discover', `Failed to fetch detail for: ${meta.class}`, 'FETCH_ERROR');
         process.exit(1);
       }
 
@@ -139,8 +136,7 @@ Search:
       category: o.category,
       description: o.description,
       deprecated: o.deprecated || false,
-      functions: o.functions.map(f => f.name),
-      properties: (o.properties || []).map(p => p.name),
+      functionCount: o.functionCount,
     }));
 
     output.success('discover', { filters: { object: values.object || null, category: values.category || null } }, {

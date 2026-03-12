@@ -78,3 +78,16 @@ export async function fetchFromRegistries(subPath) {
   }
   return null;
 }
+
+export async function fetchObjectDetail(className) {
+  const registries = getRegistries();
+  for (const url of registries) {
+    try {
+      const res = await fetch(`${url}/objects/${className}.json`);
+      if (res.ok) return await res.json();
+    } catch {
+      continue;
+    }
+  }
+  return null;
+}
