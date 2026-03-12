@@ -57,10 +57,11 @@ CLI for controlling Unreal Engine Editor via Remote Control API (HTTP :30010).
 ## Workflow
 
 1. Use `ue-cli info` to check API connectivity
-2. Use `ue-cli discover` to find available objects and functions (offline — no UE connection needed)
-3. Use `ue-cli describe <objectPath>` for full schema when exact parameter details are needed (online)
-4. Use `ue-cli get` for reads, `ue-cli call` / `ue-cli set` for writes
-5. For complex operations (BP creation, node wiring, UMG widgets), use `ue-cli script`
+2. Use `ue-cli search` to identify asset types before manipulating them (online, from UE)
+3. Use `ue-cli discover` to find available objects and functions (offline — no UE connection needed)
+4. Use `ue-cli describe <objectPath>` for full schema when exact parameter details are needed (online)
+5. Use `ue-cli get` for reads, `ue-cli call` / `ue-cli set` for writes
+6. For complex operations (BP creation, node wiring, UMG widgets), use `ue-cli script`
 
 ## Global flags
 
