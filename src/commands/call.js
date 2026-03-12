@@ -34,15 +34,20 @@ export const callCommand = {
   help() {
     console.log(`ue-cli call — Call a function on a UE object
 
-Usage: ue-cli call <objectPath> <functionName> [options]
+Usage: ue-cli call <scriptName> [options]              (script mode)
+       ue-cli call <objectPath> <functionName> [options] (API mode)
 
-Arguments:
-  objectPath      Path to the UE object
-  functionName    Name of the function to call
+Script mode (auto-detected):
+  If the first argument matches a registered script name,
+  it runs as a Python script inside UE. No objectPath needed.
+
+API mode (fallback):
+  If no matching script is found, treats arguments as
+  objectPath + functionName for direct Remote Control API call.
 
 Options:
-  --params <json>   Function parameters as JSON
-  --transaction     Generate undo transaction
+  --params <json>   Parameters as JSON
+  --transaction     Generate undo transaction (API mode only)
   --host <url>      UE host (default: http://localhost:30010)
   --dry-run         Preview request without sending
   --force           Skip confirmation
@@ -65,17 +70,14 @@ Options:
       strict: false,
     });
 
-    const objectPath = positionals[0];
-    const functionName = positionals[1];
-
     const paramsCheck = validateJSON(values.params, '--params');
     if (!paramsCheck.valid) {
       output.error('call', paramsCheck.error, 'VALIDATION_ERROR');
       process.exit(1);
     }
 
-    // Script-first: check if a matching script exists
-    const scriptMatch = await findMatchingScript(functionName, paramsCheck.parsed);
+    // Script-first: check positionals[0] as script name
+    const scriptMatch = await findMatchingScript(positionals[0], paramsCheck.parsed);
     if (scriptMatch) {
       const template = await fetchFromRegistries(`scripts/${scriptMatch.name}.py`);
       if (template) {
@@ -122,6 +124,9 @@ Options:
     }
 
     // Fallback: direct Remote Control API call
+    const objectPath = positionals[0];
+    const functionName = positionals[1];
+
     const pathCheck = validateObjectPath(objectPath);
     if (!pathCheck.valid) {
       output.error('call', pathCheck.error, 'VALIDATION_ERROR');
