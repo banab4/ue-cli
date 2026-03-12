@@ -1,16 +1,9 @@
 import { parseArgs } from 'node:util';
 import { output } from '../output.js';
-
-const DISCOVERY_URL = 'https://raw.githubusercontent.com/banab4/ue-cli/main/discovery/index.json';
+import { fetchMergedIndex } from '../config.js';
 
 async function fetchDiscovery() {
-  try {
-    const res = await fetch(DISCOVERY_URL);
-    if (!res.ok) return null;
-    return await res.json();
-  } catch {
-    return null;
-  }
+  return await fetchMergedIndex();
 }
 
 function buildExample(objectPath, func) {
@@ -33,13 +26,17 @@ export const discoverCommand = {
     console.log(`ue-cli discover — Browse available UE objects and functions
 
 Usage: ue-cli discover [options]
+       ue-cli discover <keyword>
        ue-cli discover --detail <objectPath>
 
 Options:
   --object <keyword>    Filter by class name (substring match)
   --category <cat>      Filter by category (subsystem, library)
   --detail <objectPath> Show full function signatures for an object
-  --help                Show this help`);
+  --help                Show this help
+
+Search:
+  ue-cli discover <keyword>  Search objects and scripts by keyword`);
   },
 
   async execute(positionals, argv, options) {
@@ -57,8 +54,45 @@ Options:
 
     const discovery = await fetchDiscovery();
     if (!discovery) {
-      output.error('discover', 'Failed to fetch discovery.json from GitHub', 'FETCH_ERROR');
+      output.error('discover', 'Failed to fetch discovery index from any registry', 'FETCH_ERROR');
       process.exit(1);
+    }
+
+    // Search mode: unified search across objects and scripts
+    if (positionals[0] && !values.detail && !values.object && !values.category) {
+      const query = positionals[0].toLowerCase();
+
+      const matchedObjects = [];
+      for (const obj of discovery.objects) {
+        const matchedFns = obj.functions.filter(f =>
+          f.name.toLowerCase().includes(query) ||
+          f.description.toLowerCase().includes(query)
+        );
+        if (
+          obj.class.toLowerCase().includes(query) ||
+          obj.description.toLowerCase().includes(query) ||
+          matchedFns.length > 0
+        ) {
+          matchedObjects.push({
+            objectPath: obj.objectPath,
+            class: obj.class,
+            description: obj.description,
+            matchedFunctions: matchedFns.map(f => f.name),
+          });
+        }
+      }
+
+      const matchedScripts = (discovery.scripts || []).filter(s =>
+        s.name.toLowerCase().includes(query) ||
+        s.description.toLowerCase().includes(query)
+      );
+
+      output.success('discover', { search: positionals[0] }, {
+        query: positionals[0],
+        objects: matchedObjects,
+        scripts: matchedScripts,
+      });
+      return;
     }
 
     // Detail mode: show full signatures for one object

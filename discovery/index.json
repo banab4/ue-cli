@@ -2,6 +2,25 @@
   "version": "0.1.0",
   "generated": "2026-03-12",
   "generatedBy": "manual",
+  "scripts": [
+    { "name": "create_bp", "description": "Create a new blueprint asset", "params": ["name", "parent_class"] },
+    { "name": "add_component", "description": "Add a component to a blueprint", "params": ["blueprint_name", "component_type", "component_name"] },
+    { "name": "input_mapping", "description": "Add an input action key mapping", "params": ["action_name", "key_name", "shift", "ctrl", "alt"] },
+    { "name": "node_component", "description": "Add a get-component node to a blueprint graph", "params": ["blueprint_name", "component_name", "node_pos_x", "node_pos_y"] },
+    { "name": "node_connect", "description": "Connect two blueprint node pins", "params": ["blueprint_name", "source_node_name", "source_pin_name", "target_node_name", "target_pin_name"] },
+    { "name": "node_event", "description": "Add an event node to a blueprint graph", "params": ["blueprint_name", "event_name", "node_pos_x", "node_pos_y"] },
+    { "name": "node_find", "description": "Find nodes in a blueprint graph by search term", "params": ["blueprint_name", "search_term"] },
+    { "name": "node_function", "description": "Add a function call node to a blueprint graph", "params": ["blueprint_name", "target_class", "function_name", "node_pos_x", "node_pos_y"] },
+    { "name": "node_input", "description": "Add an input action node to a blueprint graph", "params": ["blueprint_name", "action_name", "node_pos_x", "node_pos_y"] },
+    { "name": "node_self", "description": "Add a self-reference node to a blueprint graph", "params": ["blueprint_name", "node_pos_x", "node_pos_y"] },
+    { "name": "node_variable", "description": "Add a variable to a blueprint", "params": ["blueprint_name", "variable_name", "variable_type", "default_value"] },
+    { "name": "umg_create", "description": "Create a new UMG widget blueprint", "params": ["widget_name"] },
+    { "name": "umg_button", "description": "Add a button with text to a UMG widget", "params": ["widget_name", "button_name", "button_text"] },
+    { "name": "umg_text", "description": "Add a text block to a UMG widget", "params": ["widget_name", "text_content", "text_name"] },
+    { "name": "umg_event", "description": "Bind an event to a UMG widget element", "params": ["widget_name", "widget_element_name", "event_name"] },
+    { "name": "umg_text_bind", "description": "Set a text binding function on a UMG widget", "params": ["widget_name", "text_block_name", "binding_function"] },
+    { "name": "umg_viewport", "description": "Prepare a UMG widget for viewport display", "params": ["widget_name", "z_order"] }
+  ],
   "objects": [
     {
       "objectPath": "/Script/UnrealEd.Default__EditorActorSubsystem",

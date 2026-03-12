@@ -3,9 +3,7 @@ import { request } from '../http.js';
 import { output } from '../output.js';
 import { validateRequired, validateJSON } from '../validation.js';
 import { confirmWrite } from '../safety.js';
-
-const REPO_BASE = 'https://raw.githubusercontent.com/banab4/ue-cli/main/discovery/scripts';
-const GITHUB_API = 'https://api.github.com/repos/banab4/ue-cli/contents/discovery/scripts';
+import { fetchMergedIndex, fetchFromRegistries } from '../config.js';
 
 function extractPlaceholders(templateContent) {
   const placeholders = new Set();
@@ -21,33 +19,14 @@ function extractPlaceholders(templateContent) {
 }
 
 async function fetchTemplate(scriptName) {
-  const url = `${REPO_BASE}/${scriptName}.py`;
-  const res = await fetch(url);
-  if (!res.ok) return null;
-  return await res.text();
+  return await fetchFromRegistries(`scripts/${scriptName}.py`);
 }
 
 async function listTemplates() {
   try {
-    const res = await fetch(GITHUB_API, {
-      headers: { 'Accept': 'application/vnd.github.v3+json' },
-    });
-    if (!res.ok) return [];
-
-    const files = await res.json();
-    const pyFiles = files.filter(f => f.name.endsWith('.py'));
-
-    const templates = [];
-    for (const file of pyFiles) {
-      const content = await fetchTemplate(file.name.replace('.py', ''));
-      if (content) {
-        templates.push({
-          name: file.name.replace('.py', ''),
-          params: extractPlaceholders(content),
-        });
-      }
-    }
-    return templates;
+    const index = await fetchMergedIndex();
+    if (!index || !index.scripts) return [];
+    return index.scripts;
   } catch {
     return [];
   }
@@ -65,7 +44,7 @@ Arguments:
 
 Options:
   --params <json>   Template parameters as JSON
-  --list            List available templates (fetched from GitHub)
+  --list            List available templates
   --host <url>      UE host (default: http://localhost:30010)
   --dry-run         Preview request without sending
   --force           Skip confirmation
@@ -101,7 +80,7 @@ Options:
       process.exit(1);
     }
 
-    // Fetch template from GitHub
+    // Fetch template
     const template = await fetchTemplate(scriptName);
     if (!template) {
       output.error('script', `Template not found: ${scriptName}`, 'TEMPLATE_NOT_FOUND');
