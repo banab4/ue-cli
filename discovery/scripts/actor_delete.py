@@ -1,0 +1,18 @@
+import unreal
+
+actor_name = "{actor_name}"
+
+actor_subsystem = unreal.EditorActorSubsystem()
+world = unreal.EditorLevelLibrary.get_editor_world()
+actors = unreal.GameplayStatics.get_all_actors_of_class(world, unreal.Actor)
+
+deleted = False
+for actor in actors:
+    if actor.get_name() == actor_name or actor.get_actor_label() == actor_name:
+        actor_subsystem.destroy_actor(actor)
+        unreal.log("Deleted: " + actor_name)
+        deleted = True
+        break
+
+if not deleted:
+    unreal.log_error("Actor not found: " + actor_name)

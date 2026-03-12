@@ -1,6 +1,6 @@
 {
   "name": "@banaba/ue-cli",
-  "version": "0.1.3",
+  "version": "0.2.0",
   "description": "Unreal Engine Remote Control API CLI",
   "type": "module",
   "bin": {
@@ -8,7 +8,8 @@
   },
   "files": [
     "bin/",
-    "src/"
+    "src/",
+    "discovery/"
   ],
   "engines": {
     "node": ">=18"
