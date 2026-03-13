@@ -1,4 +1,8 @@
 import { parseArgs } from 'node:util';
+import { randomUUID } from 'node:crypto';
+import { readFile, unlink } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { request } from '../http.js';
 import { output } from '../output.js';
 import { validateRequired, validateJSON } from '../validation.js';
@@ -97,6 +101,14 @@ Options:
     const params = paramsCheck.parsed || {};
     const placeholders = extractPlaceholders(template);
 
+    // Auto-inject output_path if template uses it
+    const outputId = randomUUID();
+    const outputPath = join(tmpdir(), `ue-cli-${outputId}.json`).replaceAll('\\', '/');
+    const hasOutputPlaceholder = placeholders.includes('output_path');
+    if (hasOutputPlaceholder) {
+      params.output_path = outputPath;
+    }
+
     // Check all placeholders have values
     const missing = placeholders.filter(p => !(p in params));
     if (missing.length > 0) {
@@ -134,6 +146,19 @@ Options:
       process.exit(1);
     }
 
-    output.success('script', { method, path, scriptName, params }, result.data);
+    // Read script output from temp file if it exists
+    let scriptOutput = undefined;
+    if (hasOutputPlaceholder) {
+      try {
+        const raw = await readFile(outputPath, 'utf-8');
+        scriptOutput = JSON.parse(raw);
+      } catch {
+        // No output file — script didn't write one
+      } finally {
+        try { await unlink(outputPath); } catch {}
+      }
+    }
+
+    output.success('script', { method, path, scriptName, params }, { ...result.data, ...(scriptOutput !== undefined ? { scriptOutput } : {}) });
   },
 };
