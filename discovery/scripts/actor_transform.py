@@ -31,7 +31,7 @@ else:
     location = unreal.Vector(location_x, location_y, location_z)
     rotation = unreal.Rotator(rotation_pitch, rotation_yaw, rotation_roll)
     scale = unreal.Vector(scale_x, scale_y, scale_z)
-    found.set_actor_location_and_rotation(location, rotation, sweep=False, teleport=True)
+    found.set_actor_location_and_rotation(location, rotation, False, True)
     found.set_actor_scale3d(scale)
     label = found.get_actor_label()
     name = found.get_name()
