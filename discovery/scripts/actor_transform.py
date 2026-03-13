@@ -30,3 +30,5 @@ else:
     transform = unreal.Transform(location=location, rotation=rotation, scale3d=scale)
     actor_subsystem.set_actor_transform(found, transform)
     unreal.log("Transformed: " + actor_name)
+    level_subsystem = unreal.get_editor_subsystem(unreal.LevelEditorSubsystem)
+    level_subsystem.editor_invalidate_viewports()

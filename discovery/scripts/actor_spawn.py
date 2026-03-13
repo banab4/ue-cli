@@ -16,5 +16,7 @@ else:
     actor = actor_subsystem.spawn_actor_from_object(asset, location, rotation)
     if actor:
         unreal.log("Spawned: " + actor.get_name() + " at " + str(location))
+        level_subsystem = unreal.get_editor_subsystem(unreal.LevelEditorSubsystem)
+        level_subsystem.editor_invalidate_viewports()
     else:
         unreal.log_error("Failed to spawn actor from: " + asset_path)

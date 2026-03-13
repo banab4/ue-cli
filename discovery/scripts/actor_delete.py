@@ -11,6 +11,8 @@ for actor in actors:
     if actor.get_name() == actor_name or actor.get_actor_label() == actor_name:
         actor_subsystem.destroy_actor(actor)
         unreal.log("Deleted: " + actor_name)
+        level_subsystem = unreal.get_editor_subsystem(unreal.LevelEditorSubsystem)
+        level_subsystem.editor_invalidate_viewports()
         deleted = True
         break
 
