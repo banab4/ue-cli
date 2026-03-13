@@ -8,7 +8,7 @@ actors = unreal.GameplayStatics.get_all_actors_of_class(world, unreal.Actor)
 
 found = None
 for actor in actors:
-    if actor.get_name() == actor_name or actor.get_actor_label() == actor_name:
+    if actor.get_actor_label().lower() == actor_name.lower() or actor.get_name().lower() == actor_name.lower():
         found = actor
         break
 

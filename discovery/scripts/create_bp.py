@@ -2,7 +2,7 @@ import unreal
 
 name = "{name}"
 parent_class_name = "{parent_class}"
-package_path = "/Game/Blueprints"
+package_path = "{package_path}"
 
 factory = unreal.BlueprintFactory()
 

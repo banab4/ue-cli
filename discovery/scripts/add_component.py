@@ -1,13 +1,13 @@
 import unreal
 
-blueprint_name = "{blueprint_name}"
+blueprint_path = "{blueprint_path}"
 component_type = "{component_type}"
 component_name = "{component_name}"
 
-blueprint = unreal.EditorAssetLibrary.load_asset("/Game/Blueprints/" + blueprint_name)
+blueprint = unreal.EditorAssetLibrary.load_asset(blueprint_path)
 
 if not blueprint:
-    unreal.log_error("Blueprint not found: " + blueprint_name)
+    unreal.log_error("Blueprint not found: " + blueprint_path)
 else:
     subsystem = unreal.get_engine_subsystem(unreal.SubobjectDataSubsystem)
     handle = subsystem.add_new_subobject(
@@ -19,5 +19,5 @@ else:
         )
     )
     unreal.KismetEditorUtilities.compile_blueprint(blueprint)
-    unreal.EditorAssetLibrary.save_asset("/Game/Blueprints/" + blueprint_name)
-    unreal.log("Added component: " + component_name + " to " + blueprint_name)
+    unreal.EditorAssetLibrary.save_asset(blueprint_path)
+    unreal.log("Added component: " + component_name + " to " + blueprint_path)

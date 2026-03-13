@@ -18,6 +18,9 @@ for actor in actors:
     name = actor.get_name()
     cls_name = actor.get_class().get_name()
     loc = actor.get_actor_location()
-    unreal.log("ACTOR: " + label + " | " + name + " | " + cls_name + " | " + str(loc))
+    rot = actor.get_actor_rotation()
+    scale = actor.get_actor_scale3d()
+    folder = str(actor.get_folder_path())
+    unreal.log("ACTOR: " + label + " | " + name + " | " + cls_name + " | " + str(loc) + " | " + str(rot) + " | " + str(scale) + " | " + folder)
 
 unreal.log("Total: " + str(len(actors)) + " actors")
