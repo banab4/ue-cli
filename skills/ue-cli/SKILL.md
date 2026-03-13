@@ -1,6 +1,6 @@
 ---
 name: ue-cli
-version: 0.2.0
+version: 0.3.0
 description: "Unreal Engine: Control the editor via Remote Control API."
 metadata:
   requires:
@@ -18,51 +18,60 @@ CLI for controlling Unreal Engine Editor via Remote Control API (HTTP :30010).
 - `Python Editor Script Plugin` enabled (for script commands)
 - `ue-cli` installed: `npm install -g @banaba/ue-cli`
 
-## Workflow (IMPORTANT)
+## Workflow (IMPORTANT — MUST follow this order)
 
-**Script-first**: Always run `ue-cli script --list` to discover available scripts before using raw API calls. This is the **single source of truth** for the script catalog. Scripts run inside UE Python and bypass Remote Control API serialization limits.
+**NEVER skip to raw API calls.** Always resolve through scripts or discovery first.
 
-1. `ue-cli script --list` — discover available scripts (dynamic catalog)
-2. `ue-cli call <scriptName> --params '{...}' --force` — if script exists, use this
-3. Only if no script matches: `ue-cli call <objectPath> <functionName> --params '{...}' --force`
-
-### Script-first routing
-
-`ue-cli call` auto-detects: if the first argument matches a script name, it runs the script. Otherwise it falls back to direct API call.
+### Step 1. Check scripts
 
 ```bash
-# Script mode (1 arg — preferred)
-ue-cli call asset_open --params '{"asset_path":"/Game/SM/BP_Top"}' --force
-
-# API fallback (2 args — only when no script covers the function)
-ue-cli call /Script/UnrealEd.Default__UnrealEditorSubsystem GetEditorWorld --force
+ue-cli script --list
 ```
 
-## Raw API Commands
+Scan the output for a script that covers your task. Scripts run inside UE Python and bypass Remote Control API serialization limits — always preferred.
 
-Only use these when no script covers the operation:
+### Step 2. Use script if matched
+
+```bash
+ue-cli call <scriptName> --params '{...}' --force
+```
+
+`ue-cli call` auto-detects: if the first argument matches a script name, it runs as a Python script. No objectPath needed.
+
+```bash
+# Example — script mode (1 arg)
+ue-cli call asset_open --params '{"asset_path":"/Game/SM/BP_Top"}' --force
+```
+
+### Step 3. Discover (fallback)
+
+If no script matches, search the discovery catalog:
+
+```bash
+ue-cli discover                              # browse all objects/functions
+ue-cli discover <keyword>                    # search by keyword
+ue-cli discover --object <keyword>           # filter by class name
+ue-cli discover --detail <objectPath>        # show function signatures
+```
+
+Then call the discovered function:
+
+```bash
+ue-cli call <objectPath> <functionName> --params '{...}' --force
+```
+
+### Step 4. Raw API (last resort)
+
+Only when discovery also fails to find what you need:
 
 | Command | Description |
 |---------|-------------|
 | `ue-cli call <objectPath> <functionName> [--params '{}']` | Call a function |
 | `ue-cli get <objectPath> <propertyName>` | Read a property |
 | `ue-cli set <objectPath> <propertyName> --value '{}'` | Write a property |
-| `ue-cli describe <objectPath>` | Get object schema |
-
-### Discovery
-
-| Command | Description |
-|---------|-------------|
-| `ue-cli discover` | Browse available objects/functions |
-| `ue-cli discover --detail <objectPath>` | Show function signatures |
-| `ue-cli discover --object <keyword>` | Filter by class name |
-| `ue-cli info` | List all API routes (online) |
+| `ue-cli describe <objectPath>` | Inspect full object schema (online) |
 | `ue-cli search --query '{}'` | Search assets (online) |
-
-### Batch
-
-| Command | Description |
-|---------|-------------|
+| `ue-cli info` | List all API routes (online) |
 | `ue-cli batch --requests '[...]'` | Execute multiple requests |
 
 ## Global flags
