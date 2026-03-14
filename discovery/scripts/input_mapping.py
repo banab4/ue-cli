@@ -11,14 +11,20 @@ output_path = "{output_path}"
 try:
     input_settings = unreal.InputSettings.get_input_settings()
 
-    key = unreal.Key(key_name)
-    action_mapping = unreal.InputActionKeyMapping(
-        action_name=action_name,
-        key=key,
-        shift=str(shift).lower() == "true",
-        ctrl=str(ctrl).lower() == "true",
-        alt=str(alt).lower() == "true"
-    )
+    b_shift = str(shift).lower() == "true"
+    b_ctrl = str(ctrl).lower() == "true"
+    b_alt = str(alt).lower() == "true"
+
+    action_mapping = unreal.InputActionKeyMapping()
+    action_mapping.set_editor_property("action_name", action_name)
+    action_mapping.set_editor_property("shift", b_shift)
+    action_mapping.set_editor_property("ctrl", b_ctrl)
+    action_mapping.set_editor_property("alt", b_alt)
+
+    # Set key via editor property
+    key = unreal.Key()
+    key.set_editor_property("key_name", key_name)
+    action_mapping.set_editor_property("key", key)
 
     input_settings.add_action_mapping(action_mapping)
     input_settings.save_key_mappings()
