@@ -13,8 +13,8 @@ try:
         with open(output_path, "w") as f:
             json.dump({"error": "Blueprint not found: " + bp_path, "nodes": [], "total": 0}, f)
     else:
-        graph = blueprint.get_editor_property("UbergraphPages")[0]
         lib = unreal.BlueprintEditorLibrary
+        graph = lib.find_event_graph(blueprint)
         nodes = lib.find_nodes(blueprint, graph, search_term)
         results = []
         for node in nodes:

@@ -14,8 +14,8 @@ try:
         with open(output_path, "w") as f:
             json.dump({"added": False, "error": "Blueprint not found: " + bp_path}, f)
     else:
-        graph = blueprint.get_editor_property("UbergraphPages")[0]
         lib = unreal.BlueprintEditorLibrary
+        graph = lib.find_event_graph(blueprint)
         node = lib.add_self_reference_node(blueprint, graph, unreal.Vector2D(node_pos_x, node_pos_y))
         lib.compile_blueprint(blueprint)
         unreal.log("Added self reference node to " + blueprint_name)

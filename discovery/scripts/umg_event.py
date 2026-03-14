@@ -14,8 +14,8 @@ try:
         with open(output_path, "w") as f:
             json.dump({"bound": False, "error": "Widget not found: " + w_path}, f)
     else:
-        graph = widget_bp.get_editor_property("UbergraphPages")[0]
         lib = unreal.BlueprintEditorLibrary
+        graph = lib.find_event_graph(widget_bp)
         lib.add_event_node(widget_bp, graph, event_name, unreal.Vector2D(0, 0))
         lib.compile_blueprint(widget_bp)
         unreal.EditorAssetLibrary.save_asset(w_path)
