@@ -36,7 +36,15 @@ else:
 
         try:
             root = found.get_editor_property("root_component")
-            mobility = str(root.get_editor_property("mobility")) if root else "Unknown"
+            if root:
+                raw = str(root.get_editor_property("mobility"))
+                # "<ComponentMobility.STATIC: 0>" → "Static"
+                if "." in raw and ":" in raw:
+                    mobility = raw.split(".")[1].split(":")[0].strip().capitalize()
+                else:
+                    mobility = raw
+            else:
+                mobility = "Unknown"
         except Exception:
             mobility = "Unknown"
 
