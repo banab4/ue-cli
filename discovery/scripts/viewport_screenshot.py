@@ -4,48 +4,35 @@ import os
 
 output_path = "{output_path}"
 screenshot_path = "{screenshot_path}"
+_screenshot_param_set = True
 
 try:
-    import shutil
+    project_dir = unreal.Paths.project_saved_dir()
+    # UE saves high-res screenshots to Screenshots/WindowsEditor/
+    screenshot_dir = os.path.join(project_dir, "Screenshots", "WindowsEditor")
 
-    # Default screenshot path if not specified
-    if not screenshot_path or screenshot_path == "{screenshot_path}":
-        project_dir = unreal.Paths.project_saved_dir()
-        screenshot_path = os.path.join(project_dir, "Screenshots", "viewport_capture.png")
-
-    # Ensure target directory exists
-    screenshot_dir = os.path.dirname(screenshot_path)
     if not os.path.exists(screenshot_dir):
         os.makedirs(screenshot_dir)
 
-    # take_high_res_screenshot saves to project Screenshots dir with the given filename
-    # Use a temp filename to capture, then move to requested path
-    project_dir = unreal.Paths.project_saved_dir()
-    default_dir = os.path.join(project_dir, "Screenshots")
-    temp_name = "ue_cli_capture_temp.png"
-    temp_path = os.path.join(default_dir, temp_name)
-
-    if not os.path.exists(default_dir):
-        os.makedirs(default_dir)
-
-    # Remove old temp if exists
-    if os.path.exists(temp_path):
-        os.remove(temp_path)
-
-    unreal.AutomationLibrary.take_high_res_screenshot(1920, 1080, temp_name)
-
-    # Copy to requested path (take_high_res_screenshot is async, file may appear with delay)
-    # Try to copy immediately; if temp doesn't exist yet, fall back to direct capture path
-    if os.path.exists(temp_path):
-        shutil.copy2(temp_path, screenshot_path)
-        os.remove(temp_path)
+    if _screenshot_param_set and screenshot_path:
+        capture_name = os.path.basename(screenshot_path) if screenshot_path else "viewport_capture.png"
     else:
-        # Fallback: try direct path in case the API wrote there
-        shutil.copy2(os.path.join(default_dir, temp_name), screenshot_path) if os.path.exists(os.path.join(default_dir, temp_name)) else None
+        capture_name = "viewport_capture.png"
 
-    unreal.log("Screenshot saved: " + screenshot_path)
+    unreal.AutomationLibrary.take_high_res_screenshot(1920, 1080, capture_name)
+
+    actual_path = os.path.join(screenshot_dir, capture_name)
+    # Normalize to forward slashes for consistency
+    actual_path = actual_path.replace("\\", "/")
+
+    unreal.log("Screenshot queued: " + actual_path)
     with open(output_path, "w") as f:
-        json.dump({"captured": True, "path": screenshot_path}, f)
+        json.dump({
+            "captured": True,
+            "path": actual_path,
+            "note": "Screenshot is async. File appears after next frame render."
+        }, f)
+
 except Exception as e:
     unreal.log_error("Screenshot failed: " + str(e))
     with open(output_path, "w") as f:

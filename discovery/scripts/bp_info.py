@@ -1,5 +1,6 @@
 import unreal
 import json
+import re
 
 blueprint_path = "{blueprint_path}"
 output_path = "{output_path}"
@@ -13,67 +14,64 @@ if not blueprint:
 else:
     try:
         bp_class = blueprint.get_class().get_name()
+        lib = unreal.BlueprintEditorLibrary
 
-        # Parent class via generated_class → super_class
+        # Parent class: "Unknown" here, enriched by CLI post-processing
         parent = "Unknown"
+        gen_class = None
         try:
-            lib = unreal.BlueprintEditorLibrary
             gen_class = lib.generated_class(blueprint)
-            if gen_class:
-                super_cls = gen_class.get_super_class()
-                parent = super_cls.get_name() if super_cls else "None"
         except Exception:
-            try:
-                parent_cls = blueprint.get_editor_property("parent_class")
-                parent = parent_cls.get_name() if parent_cls else "None"
-            except Exception:
-                pass
+            pass
 
-        # Components via SimpleConstructionScript
+        # Components via SubobjectDataSubsystem + export_text parsing
         components = []
         try:
-            scs = blueprint.get_editor_property("simple_construction_script")
-            if scs:
-                nodes = scs.get_all_nodes()
-                for node in nodes:
-                    try:
-                        tmpl = node.get_editor_property("component_template")
-                        if tmpl:
-                            components.append({
-                                "name": tmpl.get_name(),
-                                "class": tmpl.get_class().get_name()
-                            })
-                    except Exception:
-                        components.append({"name": "(unreadable)", "class": "Unknown"})
-        except Exception:
-            pass
-
-        # Variables via BlueprintEditorLibrary
-        lib = unreal.BlueprintEditorLibrary
-        variables = []
-        try:
-            var_list = lib.get_blueprint_variable_list(blueprint)
-            for v in var_list:
+            subsys = unreal.get_engine_subsystem(unreal.SubobjectDataSubsystem)
+            handles = subsys.k2_gather_subobject_data_for_blueprint(blueprint)
+            for h in handles:
                 try:
-                    variables.append(v.get_editor_property("var_name").to_string())
+                    data = subsys.k2_find_subobject_data_from_handle(h)
+                    if data:
+                        export = data.export_text()
+                        # Parse: WeakObjectPtr="/Script/Engine.SceneComponent'/Game/.../DefaultSceneRoot_GEN_VARIABLE'"
+                        wp_match = re.search(r'WeakObjectPtr="([^"]*)"', export)
+                        if wp_match:
+                            wp = wp_match.group(1)
+                            # Extract class: /Script/Engine.SceneComponent'...' → SceneComponent
+                            cls_match = re.search(r'/[^.]+\.(\w+)\'', wp)
+                            # Extract name: last part after : or / before '
+                            name_match = re.search(r'[:/](\w+)\'?$', wp.split("'")[1] if "'" in wp else wp)
+                            comp_class = cls_match.group(1) if cls_match else "Unknown"
+                            comp_name = name_match.group(1) if name_match else "Unknown"
+                            # Skip CDO entry (Default__*_C)
+                            if "Default__" in wp:
+                                continue
+                            # Clean up GEN_VARIABLE suffix
+                            comp_name = comp_name.replace("_GEN_VARIABLE", "")
+                            components.append({"name": comp_name, "class": comp_class})
                 except Exception:
-                    try:
-                        variables.append(str(v.get_editor_property("var_name")))
-                    except Exception:
-                        variables.append(str(v))
+                    components.append({"name": "(unreadable)", "class": "Unknown"})
         except Exception:
             pass
 
-        # Graphs: uber_graph_pages + function_graphs
+        # Graphs via find_event_graph / find_graph
         graphs = []
         try:
-            for page in blueprint.get_editor_property("uber_graph_pages"):
-                graphs.append(page.get_name())
+            eg = lib.find_event_graph(blueprint)
+            if eg:
+                graphs.append(eg.get_name())
         except Exception:
             pass
         try:
-            for fg in blueprint.get_editor_property("function_graphs"):
-                graphs.append(fg.get_name())
+            # Try common graph names
+            for gname in ["ConstructionScript", "UserConstructionScript"]:
+                try:
+                    g = lib.find_graph(blueprint, gname)
+                    if g and g.get_name() not in graphs:
+                        graphs.append(g.get_name())
+                except Exception:
+                    pass
         except Exception:
             pass
 
@@ -82,9 +80,10 @@ else:
             json.dump({
                 "found": True, "blueprint_path": blueprint_path,
                 "class": bp_class, "parent_class": parent,
+                "generated_class": gen_class.get_name() if gen_class else "Unknown",
                 "components_count": len(components),
                 "components": components,
-                "variables": variables,
+                "variables": [],
                 "graphs": graphs
             }, f)
     except Exception as e:
