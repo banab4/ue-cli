@@ -144,21 +144,6 @@ Options:
           }
         }
 
-        // Post-process: enrich bp_info with ParentClass via separate get call
-        if (scriptMatch.name === 'bp_info' && scriptOutput && scriptOutput.found && scriptOutput.parent_class === 'Unknown' && params.blueprint_path) {
-          try {
-            const getResult = await request('PUT', '/remote/object/property', {
-              objectPath: params.blueprint_path,
-              propertyName: 'ParentClass',
-              access: 'READ_ACCESS',
-            }, options);
-            if (getResult.ok && getResult.data && getResult.data.ParentClass) {
-              const pc = getResult.data.ParentClass;
-              scriptOutput.parent_class = pc.includes('.') ? pc.split('.').pop() : pc;
-            }
-          } catch {}
-        }
-
         output.success('call', { method, path, scriptName: scriptMatch.name, params, via: 'script' }, { ...result.data, ...(scriptOutput !== undefined ? { scriptOutput } : {}) });
         return;
       }

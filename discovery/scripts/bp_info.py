@@ -16,8 +16,6 @@ else:
         bp_class = blueprint.get_class().get_name()
         lib = unreal.BlueprintEditorLibrary
 
-        # Parent class: "Unknown" here, enriched by CLI post-processing
-        parent = "Unknown"
         gen_class = None
         try:
             gen_class = lib.generated_class(blueprint)
@@ -79,7 +77,7 @@ else:
         with open(output_path, "w") as f:
             json.dump({
                 "found": True, "blueprint_path": blueprint_path,
-                "class": bp_class, "parent_class": parent,
+                "class": bp_class,
                 "generated_class": gen_class.get_name() if gen_class else "Unknown",
                 "components_count": len(components),
                 "components": components,
