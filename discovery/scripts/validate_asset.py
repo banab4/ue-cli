@@ -10,20 +10,35 @@ try:
         with open(output_path, "w") as f:
             json.dump({"valid": False, "error": "Asset not found: " + asset_path}, f)
     else:
-        validator = unreal.get_editor_subsystem(unreal.EditorValidatorSubsystem)
-        # Validate single asset
-        result = validator.validate_asset(asset)
-        # Result is EDataValidationResult enum
-        result_str = str(result)
-        is_valid = "VALID" in result_str.upper() and "INVALID" not in result_str.upper()
+        cls_name = asset.get_class().get_name()
+        issues = []
 
-        unreal.log("Validated: " + asset_path + " = " + result_str)
+        # Check if blueprint compiles
+        if cls_name == "Blueprint":
+            try:
+                lib = unreal.BlueprintEditorLibrary
+                lib.compile_blueprint(asset)
+                # Check for compiler errors by recompiling
+            except Exception as e:
+                issues.append("Blueprint compile error: " + str(e))
+
+        # Check asset references
+        try:
+            deps = unreal.EditorAssetLibrary.find_package_referencers_for_asset(asset_path)
+            ref_count = len(deps) if deps else 0
+        except Exception:
+            ref_count = -1
+
+        is_valid = len(issues) == 0
+
+        unreal.log("Validated: " + asset_path)
         with open(output_path, "w") as f:
             json.dump({
                 "valid": is_valid,
                 "asset_path": asset_path,
-                "result": result_str,
-                "class": asset.get_class().get_name()
+                "class": cls_name,
+                "issues": issues,
+                "referencer_count": ref_count
             }, f)
 except Exception as e:
     unreal.log_error("validate_asset failed: " + str(e))

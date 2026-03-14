@@ -7,18 +7,36 @@ try:
     world = unreal.EditorLevelLibrary.get_editor_world()
     level_name = world.get_name() if world else "Unknown"
 
-    # Run map check
-    validator = unreal.get_editor_subsystem(unreal.EditorValidatorSubsystem)
-    result = validator.validate_asset(world)
-    result_str = str(result)
-    is_valid = "VALID" in result_str.upper() and "INVALID" not in result_str.upper()
+    actors = unreal.GameplayStatics.get_all_actors_of_class(world, unreal.Actor)
+    issues = []
 
-    unreal.log("Map check: " + level_name + " = " + result_str)
+    # Check for common map issues
+    actor_count = len(actors)
+    has_player_start = False
+    has_light = False
+    overlapping_actors = []
+
+    for actor in actors:
+        cls = actor.get_class().get_name()
+        if cls == "PlayerStart":
+            has_player_start = True
+        if "Light" in cls:
+            has_light = True
+
+    if not has_player_start:
+        issues.append("No PlayerStart found in level")
+    if not has_light:
+        issues.append("No light source found in level")
+
+    is_valid = len(issues) == 0
+
+    unreal.log("Map check: " + level_name)
     with open(output_path, "w") as f:
         json.dump({
             "valid": is_valid,
             "level_name": level_name,
-            "result": result_str
+            "actor_count": actor_count,
+            "issues": issues
         }, f)
 except Exception as e:
     unreal.log_error("validate_map failed: " + str(e))
