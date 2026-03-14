@@ -26,7 +26,11 @@ else:
     scale = found.get_actor_scale3d()
     folder = str(found.get_folder_path())
     hidden = found.is_hidden()
-    mobility = str(found.get_editor_property("root_component").get_editor_property("mobility")) if found.get_editor_property("root_component") else "Unknown"
+    try:
+        root = found.get_editor_property("root_component")
+        mobility = str(root.get_editor_property("mobility")) if root else "Unknown"
+    except Exception:
+        mobility = "Unknown"
 
     components = []
     for comp in found.get_components_by_class(unreal.ActorComponent):

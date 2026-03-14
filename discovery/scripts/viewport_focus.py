@@ -22,7 +22,7 @@ else:
     actor_subsystem.set_selected_level_actors([found])
 
     loc = found.get_actor_location()
-    rot = unreal.Rotator(-30, 0, 0)
+    rot = unreal.Rotator(0, -30, 0)
     unreal.EditorLevelLibrary.set_level_viewport_camera_info(loc + unreal.Vector(-500, 0, 300), rot)
 
     level_subsystem = unreal.get_editor_subsystem(unreal.LevelEditorSubsystem)

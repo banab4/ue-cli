@@ -18,7 +18,7 @@ if not found:
     with open(output_path, "w") as f:
         json.dump({"duplicated": False, "error": "Actor not found: " + actor_name}, f)
 else:
-    actor_subsystem = unreal.EditorActorSubsystem()
+    actor_subsystem = unreal.get_editor_subsystem(unreal.EditorActorSubsystem)
     actor_subsystem.set_selected_level_actors([found])
     duplicated = actor_subsystem.duplicate_selected_actors(world)
 

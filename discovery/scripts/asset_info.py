@@ -18,11 +18,14 @@ else:
     outer = asset.get_outermost().get_name() if asset.get_outermost() else ""
 
     metadata = {}
-    subsystem = unreal.get_editor_subsystem(unreal.EditorAssetSubsystem)
-    tags = subsystem.get_metadata_tag_values(asset_path)
-    if tags:
-        for key in tags:
-            metadata[str(key)] = str(tags[key])
+    try:
+        subsystem = unreal.get_editor_subsystem(unreal.EditorAssetSubsystem)
+        tags = subsystem.get_metadata_tag_values(asset_path)
+        if tags:
+            for key in tags:
+                metadata[str(key)] = str(tags[key])
+    except Exception:
+        pass
 
     unreal.log("Asset info: " + asset_path)
     with open(output_path, "w") as f:

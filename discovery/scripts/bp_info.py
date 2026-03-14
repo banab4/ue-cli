@@ -15,13 +15,21 @@ else:
     parent = str(blueprint.get_editor_property("parent_class").get_name()) if blueprint.get_editor_property("parent_class") else "None"
 
     # Get components via SubobjectDataSubsystem
-    subsystem = unreal.get_engine_subsystem(unreal.SubobjectDataSubsystem)
-    handles = subsystem.k2_gather_subobject_data_for_blueprint(blueprint)
     components = []
-    for h in handles:
-        found, data = subsystem.k2_find_subobject_data_from_handle(h)
-        if found:
-            components.append(str(data))
+    component_count = 0
+    try:
+        subsystem = unreal.get_engine_subsystem(unreal.SubobjectDataSubsystem)
+        handles = subsystem.k2_gather_subobject_data_for_blueprint(blueprint)
+        component_count = len(handles)
+        for h in handles:
+            try:
+                result = subsystem.k2_find_subobject_data_from_handle(h)
+                if result:
+                    components.append(str(result))
+            except Exception:
+                components.append("(unreadable)")
+    except Exception:
+        pass
 
     # Get variables
     lib = unreal.BlueprintEditorLibrary
@@ -47,7 +55,7 @@ else:
         json.dump({
             "found": True, "blueprint_path": blueprint_path,
             "class": bp_class, "parent_class": parent,
-            "components_count": len(handles),
+            "components_count": component_count,
             "components": components,
             "variables": variables,
             "graphs": graphs

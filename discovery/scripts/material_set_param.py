@@ -15,28 +15,23 @@ if not material:
     unreal.log_error("Material not found: " + material_path)
     with open(output_path, "w") as f:
         json.dump({"set": False, "error": "Material not found: " + material_path}, f)
+elif material.get_class().get_name() != "MaterialInstanceConstant":
+    cls_name = material.get_class().get_name()
+    unreal.log_error("Not a MaterialInstanceConstant: " + material_path + " (class: " + cls_name + ")")
+    with open(output_path, "w") as f:
+        json.dump({"set": False, "error": "Only MaterialInstanceConstant is supported. Got: " + cls_name + ". Create a MaterialInstance first."}, f)
 else:
     try:
-        is_instance = material.get_class().get_name() == "MaterialInstanceConstant"
         value = json.loads(param_value)
 
         if param_type.lower() == "scalar":
-            if is_instance:
-                mat_lib.set_material_instance_scalar_parameter_value(material, param_name, float(value))
-            else:
-                mat_lib.set_material_instance_scalar_parameter_value(material, param_name, float(value))
+            mat_lib.set_material_instance_scalar_parameter_value(material, param_name, float(value))
         elif param_type.lower() == "vector":
             color = unreal.LinearColor(value[0], value[1], value[2], value[3] if len(value) > 3 else 1.0)
-            if is_instance:
-                mat_lib.set_material_instance_vector_parameter_value(material, param_name, color)
-            else:
-                mat_lib.set_material_instance_vector_parameter_value(material, param_name, color)
+            mat_lib.set_material_instance_vector_parameter_value(material, param_name, color)
         elif param_type.lower() == "texture":
             texture = unreal.EditorAssetLibrary.load_asset(str(value))
-            if is_instance:
-                mat_lib.set_material_instance_texture_parameter_value(material, param_name, texture)
-            else:
-                mat_lib.set_material_instance_texture_parameter_value(material, param_name, texture)
+            mat_lib.set_material_instance_texture_parameter_value(material, param_name, texture)
 
         unreal.EditorAssetLibrary.save_asset(material_path)
         unreal.log("Set param: " + param_name + " on " + material_path)
