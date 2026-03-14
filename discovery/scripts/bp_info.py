@@ -82,7 +82,7 @@ else:
             json.dump({
                 "found": True, "blueprint_path": blueprint_path,
                 "class": bp_class, "parent_class": parent,
-                "components_count": component_count,
+                "components_count": len(components),
                 "components": components,
                 "variables": variables,
                 "graphs": graphs
