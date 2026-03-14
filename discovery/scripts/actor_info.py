@@ -26,7 +26,13 @@ else:
         rot = found.get_actor_rotation()
         scale = found.get_actor_scale3d()
         folder = str(found.get_folder_path())
-        hidden = found.is_hidden()
+        try:
+            hidden = found.is_hidden_ed()
+        except Exception:
+            try:
+                hidden = found.get_editor_property("bHidden")
+            except Exception:
+                hidden = False
 
         try:
             root = found.get_editor_property("root_component")

@@ -18,21 +18,29 @@ if not found:
     with open(output_path, "w") as f:
         json.dump({"duplicated": False, "error": "Actor not found: " + actor_name}, f)
 else:
-    actor_subsystem = unreal.get_editor_subsystem(unreal.EditorActorSubsystem)
-    actor_subsystem.set_selected_level_actors([found])
-    duplicated = actor_subsystem.duplicate_selected_actors(world)
+    try:
+        # Select the actor first, then duplicate via editor command
+        actor_subsystem = unreal.get_editor_subsystem(unreal.EditorActorSubsystem)
+        actor_subsystem.set_selected_level_actors([found])
 
-    if duplicated and len(duplicated) > 0:
-        new_actor = duplicated[0]
-        label = new_actor.get_actor_label()
-        name = new_actor.get_name()
-        loc = new_actor.get_actor_location()
-        unreal.log("Duplicated: " + actor_name + " -> " + label)
-        level_subsystem = unreal.get_editor_subsystem(unreal.LevelEditorSubsystem)
-        level_subsystem.editor_invalidate_viewports()
+        # Try duplicate_actors (list-based)
+        duplicated = actor_subsystem.duplicate_actors([found])
+
+        if duplicated and len(duplicated) > 0:
+            new_actor = duplicated[0]
+            label = new_actor.get_actor_label()
+            name = new_actor.get_name()
+            loc = new_actor.get_actor_location()
+            unreal.log("Duplicated: " + actor_name + " -> " + label)
+            level_subsystem = unreal.get_editor_subsystem(unreal.LevelEditorSubsystem)
+            level_subsystem.editor_invalidate_viewports()
+            with open(output_path, "w") as f:
+                json.dump({"duplicated": True, "original": actor_name, "new_label": label, "new_name": name, "location": {"x": loc.x, "y": loc.y, "z": loc.z}}, f)
+        else:
+            unreal.log_error("Failed to duplicate: " + actor_name)
+            with open(output_path, "w") as f:
+                json.dump({"duplicated": False, "error": "duplicate_actors returned empty"}, f)
+    except Exception as e:
+        unreal.log_error("actor_duplicate failed: " + str(e))
         with open(output_path, "w") as f:
-            json.dump({"duplicated": True, "original": actor_name, "new_label": label, "new_name": name, "location": {"x": loc.x, "y": loc.y, "z": loc.z}}, f)
-    else:
-        unreal.log_error("Failed to duplicate: " + actor_name)
-        with open(output_path, "w") as f:
-            json.dump({"duplicated": False, "error": "Failed to duplicate: " + actor_name}, f)
+            json.dump({"duplicated": False, "error": "Script error: " + str(e)}, f)

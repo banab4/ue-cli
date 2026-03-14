@@ -15,7 +15,8 @@ else:
         bp_class = blueprint.get_class().get_name()
 
         try:
-            parent = str(blueprint.get_editor_property("parent_class").get_name())
+            parent_cls = blueprint.get_editor_property("parent_class")
+            parent = parent_cls.get_name() if parent_cls else "None"
         except Exception:
             parent = "Unknown"
 
@@ -30,7 +31,8 @@ else:
                 try:
                     result = subsystem.k2_find_subobject_data_from_handle(h)
                     if result:
-                        components.append(str(result))
+                        display = result.get_display_name() if hasattr(result, 'get_display_name') else str(result)
+                        components.append(display)
                 except Exception:
                     components.append("(unreadable)")
         except Exception:
