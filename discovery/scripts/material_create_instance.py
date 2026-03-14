@@ -13,11 +13,11 @@ try:
             json.dump({"created": False, "error": "Parent material not found: " + parent_path}, f)
     else:
         factory = unreal.MaterialInstanceConstantFactoryNew()
-        factory.set_editor_property("initial_parent", parent)
         asset_tools = unreal.AssetToolsHelpers.get_asset_tools()
         instance = asset_tools.create_asset(instance_name, package_path, unreal.MaterialInstanceConstant, factory)
 
         if instance:
+            unreal.MaterialEditingLibrary.set_material_instance_parent(instance, parent)
             full_path = package_path + "/" + instance_name
             unreal.EditorAssetLibrary.save_asset(full_path)
             unreal.log("Created material instance: " + full_path)
