@@ -5,19 +5,28 @@ blueprint_name = "{blueprint_name}"
 search_term = "{search_term}"
 output_path = "{output_path}"
 
-blueprint = unreal.EditorAssetLibrary.load_asset("/Game/Blueprints/" + blueprint_name)
+try:
+    bp_path = blueprint_name if blueprint_name.startswith("/") else "/Game/Blueprints/" + blueprint_name
+    blueprint = unreal.EditorAssetLibrary.load_asset(bp_path)
 
-if not blueprint:
-    unreal.log_error("Blueprint not found: " + blueprint_name)
+    if not blueprint:
+        with open(output_path, "w") as f:
+            json.dump({"error": "Blueprint not found: " + bp_path, "nodes": [], "total": 0}, f)
+    else:
+        graph = blueprint.get_editor_property("UbergraphPages")[0]
+        lib = unreal.BlueprintEditorLibrary
+        nodes = lib.find_nodes(blueprint, graph, search_term)
+        results = []
+        for node in nodes:
+            try:
+                comment = str(node.get_editor_property("NodeComment"))
+            except Exception:
+                comment = ""
+            results.append({"comment": comment, "node": str(node)})
+        unreal.log("Found " + str(len(results)) + " nodes")
+        with open(output_path, "w") as f:
+            json.dump({"nodes": results, "total": len(results), "blueprint": bp_path}, f)
+except Exception as e:
+    unreal.log_error("node_find failed: " + str(e))
     with open(output_path, "w") as f:
-        json.dump({"error": "Blueprint not found: " + blueprint_name, "nodes": [], "total": 0}, f)
-else:
-    graph = blueprint.get_editor_property("UbergraphPages")[0]
-    lib = unreal.BlueprintEditorLibrary
-    nodes = lib.find_nodes(blueprint, graph, search_term)
-    results = []
-    for node in nodes:
-        results.append({"comment": str(node.get_editor_property("NodeComment")), "node": str(node)})
-    with open(output_path, "w") as f:
-        json.dump({"nodes": results, "total": len(results)}, f)
-    unreal.log("Found " + str(len(results)) + " nodes")
+        json.dump({"error": str(e), "nodes": [], "total": 0}, f)
