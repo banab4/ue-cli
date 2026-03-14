@@ -10,11 +10,13 @@ rotation_roll = {rotation_roll}
 output_path = "{output_path}"
 
 try:
-    level_subsystem = unreal.get_editor_subsystem(unreal.LevelEditorSubsystem)
     location = unreal.Vector(location_x, location_y, location_z)
     rotation = unreal.Rotator(rotation_roll, rotation_pitch, rotation_yaw)
 
-    level_subsystem.set_level_viewport_camera_info(location, rotation)
+    unreal.EditorLevelLibrary.set_level_viewport_camera_info(location, rotation)
+
+    level_subsystem = unreal.get_editor_subsystem(unreal.LevelEditorSubsystem)
+    level_subsystem.editor_invalidate_viewports()
 
     unreal.log("Set viewport camera")
     with open(output_path, "w") as f:
